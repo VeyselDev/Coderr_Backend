@@ -153,8 +153,8 @@ class OfferSerializer(serializers.ModelSerializer):
     - user_details (first name, last name, username)
     """
     details = DetailReadOnlySerializer(many=True, read_only=True)
-    min_price = serializers.DecimalField(max_digits=16, decimal_places=2, read_only=True)
-    min_delivery_time = serializers.IntegerField(read_only=True)
+    min_price = serializers.DecimalField(source='min_price_annotated', max_digits=16, decimal_places=2, read_only=True)
+    min_delivery_time = serializers.IntegerField(source='min_delivery_time_annotated', read_only=True)
     user_details = serializers.SerializerMethodField()
 
     class Meta:
