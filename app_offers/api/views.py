@@ -45,31 +45,42 @@ class OffersView(APIView):
 
         params = request.query_params
 
-        try:
-            if "creator_id" in params and params["creator_id"]:
-                creator_id = int(params["creator_id"])
-                queryset = queryset.filter(user_id=creator_id)
+        creator_id = params.get("creator_id")
+        if creator_id not in [None, ""]:
+            try:
+                queryset = queryset.filter(user_id=int(creator_id))
+            except ValueError:
+                return Response({"detail": "Invalid creator_id parameter."}, status=status.HTTP_400_BAD_REQUEST)
 
-            if "min_price" in params and params["min_price"]:
-                min_price = float(params["min_price"])
-                queryset = queryset.filter(details__price__gte=min_price)
+        min_price = params.get("min_price")
+        if min_price not in [None, ""]:
+            try:
+                queryset = queryset.filter(details__price__gte=float(min_price))
+            except ValueError:
+                return Response({"detail": "Invalid min_price parameter."}, status=status.HTTP_400_BAD_REQUEST)
 
-            if "max_delivery_time" in params and params["max_delivery_time"]:
-                max_delivery = int(params["max_delivery_time"])
-                queryset = queryset.filter(details__delivery_time_in_days__lte=max_delivery)
+        max_delivery = params.get("max_delivery_time")
+        if max_delivery not in [None, ""]:
+            try:
+                queryset = queryset.filter(details__delivery_time_in_days__lte=int(max_delivery))
+            except ValueError:
+                return Response({"detail": "Invalid max_delivery_time parameter."}, status=status.HTTP_400_BAD_REQUEST)
 
-        except (ValueError, TypeError):
-            return Response(
-                {"detail": "Invalid query parameter type."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
-        if "search" in params and params["search"]:
-            search = params["search"]
+        search = params.get("search")
+        if search:
             queryset = queryset.filter(Q(title__icontains=search) | Q(description__icontains=search))
+
 
         ordering = params.get("ordering")
         if ordering:
+            ordering_map = {
+                "min_price": "min_price_annotated",
+                "-min_price": "-min_price_annotated",
+                "min_delivery_time": "min_delivery_time_annotated",
+                "-min_delivery_time": "-min_delivery_time_annotated",
+            }
+            ordering = ordering_map.get(ordering, ordering)
             queryset = queryset.order_by(ordering)
         else:
             queryset = queryset.order_by("id")
