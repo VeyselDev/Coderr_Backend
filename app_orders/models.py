@@ -28,7 +28,7 @@ class Order(models.Model):
     customer_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders_customer')
     business_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='orders_business')
     title = models.CharField(max_length=255)
-    revisions = models.PositiveIntegerField(default=0)
+    revisions = models.IntegerField(default=0)
     delivery_time_in_days = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=16, decimal_places=2)
     features = models.JSONField(default=list)
