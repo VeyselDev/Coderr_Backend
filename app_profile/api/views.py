@@ -30,16 +30,11 @@ class ProfileDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request, id):
-        """
-        Updates a profile partially.
-        - Ensures required fields are not None.
-        - Validates that the new email (if provided) is unique across users.
-        - Saves updates to both profile and user email if changed.
-        """
         profile = get_object_or_404(Profile, pk=id)
         self.check_object_permissions(request, profile)
 
-        data = request.data.copy()
+        data = {k: v for k, v in request.data.items() if k not in request.FILES}
+        files = request.FILES
 
         for field in ['first_name', 'last_name', 'location', 'tel', 'description', 'working_hours']:
             if field not in data or data[field] is None:
@@ -57,6 +52,11 @@ class ProfileDetailView(APIView):
         if new_email:
             profile.user.email = new_email
             profile.user.save()
+
+        for field_name, uploaded_file in files.items():
+            setattr(profile, field_name, uploaded_file)
+        if files:
+            profile.save()
 
         return Response(ProfileDetailSerializer(profile).data, status=status.HTTP_200_OK)
 
