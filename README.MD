@@ -32,7 +32,7 @@ API with token-based authentication.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/VeyselKaraali/Coderr_Backend.git
+git clone https://github.com/VeyselDev/Coderr_Backend.git
 cd Coderr_Backend
 ```
 
